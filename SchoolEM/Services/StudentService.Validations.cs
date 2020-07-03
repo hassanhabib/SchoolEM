@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using FluentValidation;
 using SchoolEM.Models.Students;
 using SchoolEM.Models.Students.Exceptions;
 
@@ -7,12 +8,10 @@ namespace SchoolEM.Services
 {
     public partial class StudentService
     {
-
         public void ValidateStudent(Student student)
         {
             ValidateStudentIsNotNull(student);
-            ValidateStudentId(student.Id);
-            ValidateStudentName(student);
+            this.studentValidator.ValidateAndThrow(student);
         }
 
         private void ValidateStudentIsNotNull(Student student)
@@ -23,17 +22,7 @@ namespace SchoolEM.Services
             }
         }
 
-        private static void ValidateStudentName(Student student)
-        {
-            if (string.IsNullOrWhiteSpace(student.Name))
-            {
-                throw new InvalidStudentException(
-                    parameterName: nameof(Student.Name),
-                    parameterValue: student.Name);
-            }
-        }
-
-        private static void ValidateStudentId(Guid studentId)
+        private void ValidateStudentId(Guid studentId)
         {
             if (studentId == Guid.Empty)
             {
@@ -56,6 +45,16 @@ namespace SchoolEM.Services
             if (storageStudents.Count() == 0)
             {
                 this.loggingBroker.LogWarning("Students storage is empty.");
+            }
+        }
+
+        public class StudentValidator : AbstractValidator<Student>
+        {
+            public StudentValidator()
+            {
+                RuleFor(student => student).NotNull();
+                RuleFor(student => student.Id).NotEmpty();
+                RuleFor(student => student.Name).NotEmpty();
             }
         }
     }

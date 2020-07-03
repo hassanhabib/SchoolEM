@@ -11,6 +11,7 @@ namespace SchoolEM.Services
     {
         private readonly IStorageBroker storageBroker;
         private readonly ILoggingBroker loggingBroker;
+        private readonly StudentValidator studentValidator;
 
         public StudentService(
             IStorageBroker storageBroker,
@@ -18,6 +19,7 @@ namespace SchoolEM.Services
         {
             this.storageBroker = storageBroker;
             this.loggingBroker = loggingBroker;
+            this.studentValidator = new StudentValidator();
         }
 
         public ValueTask<Student> RegisterStudentAsync(Student student) =>

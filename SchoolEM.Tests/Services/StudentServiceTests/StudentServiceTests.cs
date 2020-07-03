@@ -9,6 +9,7 @@ using SchoolEM.Brokers.Storage;
 using SchoolEM.Models.Students;
 using SchoolEM.Services;
 using Tynamix.ObjectFiller;
+using static SchoolEM.Services.StudentService;
 
 namespace SchoolEM.Tests.Services.StudentServiceTests
 {
@@ -17,11 +18,13 @@ namespace SchoolEM.Tests.Services.StudentServiceTests
         private readonly Mock<IStorageBroker> storageBrokerMock;
         private readonly IStudentService studentService;
         private readonly Mock<ILoggingBroker> loggingBrokerMock;
-
+        private readonly StudentValidator studentValidator;
+        
         public StudentServiceTests()
         {
             this.storageBrokerMock = new Mock<IStorageBroker>();
             this.loggingBrokerMock = new Mock<ILoggingBroker>();
+            this.studentValidator = new StudentValidator();
 
             this.studentService = new StudentService(
                 storageBroker: this.storageBrokerMock.Object,

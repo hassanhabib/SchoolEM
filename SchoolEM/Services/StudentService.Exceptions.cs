@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using EFxceptions.Models.Exceptions;
+using FluentValidation;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using SchoolEM.Models.Students;
@@ -47,6 +48,10 @@ namespace SchoolEM.Services
             catch (DbUpdateException dbUpdateException)
             {
                 throw CreateAndLogDependencyException(dbUpdateException);
+            }
+            catch (ValidationException validationException)
+            {
+                throw CreateAndLogValidationException(validationException);
             }
             catch (Exception exception)
             {

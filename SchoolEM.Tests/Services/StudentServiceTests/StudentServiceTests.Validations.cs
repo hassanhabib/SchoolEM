@@ -4,11 +4,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using EFxceptions.Models.Exceptions;
 using FluentAssertions;
+using FluentValidation;
+using FluentValidation.Results;
+using FluentValidation.TestHelper;
 using Moq;
 using SchoolEM.Models.Students;
 using SchoolEM.Models.Students.Exceptions;
 using Tynamix.ObjectFiller;
 using Xunit;
+using static SchoolEM.Services.StudentService;
 
 namespace SchoolEM.Tests.Services.StudentServiceTests
 {
@@ -50,7 +54,7 @@ namespace SchoolEM.Tests.Services.StudentServiceTests
         }
 
         [Fact]
-        public async Task ShouldThorwValidationExceptionOnRegisterIfStudentNameWasInvalidAndLogItAsync()
+        public async Task ShouldThrowValidationExceptionOnRegisterIfStudentNameWasInvalidAndLogItAsync()
         {
             // given
             Student randomStudent = CreateRandomStudent();
@@ -58,12 +62,14 @@ namespace SchoolEM.Tests.Services.StudentServiceTests
             string invalidName = string.Empty;
             invalidStudent.Name = invalidName;
 
-            var invalidStudentException = new InvalidStudentException(
-                parameterName: nameof(Student.Name),
-                parameterValue: invalidStudent.Name);
+            IEnumerable<ValidationFailure> validationFailures =
+                studentValidator.ShouldHaveValidationErrorFor(student => 
+                    student.Name, invalidStudent);
+
+            var validationException = new ValidationException(validationFailures);
 
             var expectedStudentValidationException =
-                new StudentValidationException(invalidStudentException);
+                new StudentValidationException(validationException);
 
             // when
             ValueTask<Student> registerStudentTask =
@@ -94,12 +100,13 @@ namespace SchoolEM.Tests.Services.StudentServiceTests
             Guid invalidId = Guid.Empty;
             invalidStudent.Id = invalidId;
 
-            var invalidStudentException = new InvalidStudentException(
-                parameterName: nameof(Student.Id),
-                parameterValue: invalidStudent.Id);
+            IEnumerable<ValidationFailure> failures =
+                this.studentValidator.ShouldHaveValidationErrorFor(student => student.Id, invalidStudent);
+
+            var validationException = new ValidationException(failures);
 
             var expectedStudentValidationException =
-                new StudentValidationException(invalidStudentException);
+                new StudentValidationException(validationException);
 
             // when
             ValueTask<Student> registerStudentTask =
@@ -296,12 +303,14 @@ namespace SchoolEM.Tests.Services.StudentServiceTests
             Student invalidStudent = randomStudent;
             invalidStudent.Id = invalidStudentId;
 
-            var invalidStudentException = new InvalidStudentException(
-                parameterName: nameof(Student.Id),
-                parameterValue: invalidStudent.Id);
+            IEnumerable<ValidationFailure> validationFailures =
+                studentValidator.ShouldHaveValidationErrorFor(student =>
+                    student.Id, invalidStudent);
+
+            var validationException = new ValidationException(validationFailures);
 
             var expectedStudentValidationException =
-                new StudentValidationException(invalidStudentException);
+                new StudentValidationException(validationException);
 
             //when
             ValueTask<Student> modifyStudentTask =
@@ -351,12 +360,14 @@ namespace SchoolEM.Tests.Services.StudentServiceTests
             Student invalidStudent = randomStudent;
             invalidStudent.Name = invalidName;
 
-            var invalidStudentException = new InvalidStudentException(
-                parameterName: nameof(Student.Name),
-                parameterValue: invalidStudent.Name);
+            IEnumerable<ValidationFailure> validationFailures =
+                studentValidator.ShouldHaveValidationErrorFor(student =>
+                    student.Name, invalidStudent);
+
+            var validationException = new ValidationException(validationFailures);
 
             var expectedStudentValidationException =
-                new StudentValidationException(invalidStudentException);
+                new StudentValidationException(validationException);
 
             //when
             ValueTask<Student> modifyStudentTask =
