@@ -1,3 +1,5 @@
+using Microsoft.AspNet.OData.Batch;
+using Microsoft.AspNet.OData.Builder;
 using Microsoft.AspNet.OData.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -6,8 +8,10 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.OData.Edm;
 using SchoolEM.Brokers.Logging;
 using SchoolEM.Brokers.Storage;
+using SchoolEM.Models.Students;
 using SchoolEM.Services;
 
 namespace SchoolEM
@@ -43,6 +47,7 @@ namespace SchoolEM
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseODataBatching();
             app.UseHttpsRedirection();
             app.UseRouting();
             app.UseAuthorization();
@@ -50,9 +55,20 @@ namespace SchoolEM
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.EnableDependencyInjection();
                 endpoints.Select().Filter().Expand().OrderBy();
+                endpoints.MapODataRoute(
+                    routeName: "api", 
+                    routePrefix: "api", 
+                    model: GetEdmModel(), 
+                    batchHandler: new DefaultODataBatchHandler());
             });
+        }
+
+        private IEdmModel GetEdmModel()
+        {
+            var builder = new ODataConventionModelBuilder();
+            builder.EntitySet<Student>("Students");
+            return builder.GetEdmModel();
         }
     }
 }
